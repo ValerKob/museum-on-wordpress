@@ -82,12 +82,135 @@ get_header();
         <div class="museum-content">
 
             <?php
-            while (have_posts()) :
-                the_post();
+                while (have_posts()) :
+                    the_post();
 
-                the_content();
-            endwhile;
-            ?>
+                    if (get_post_type() !== 'museum_event') {
+                        the_content();
+                    }
+
+                endwhile;
+                ?>
+
+                <?php if (get_the_title() === 'Афиши мероприятий') : ?>
+
+                <?php
+                    $events = new WP_Query(array(
+                        'post_type'      => 'museum_event',
+                        'posts_per_page' => -1,
+                        'post_status'    => 'publish',
+                        'orderby'        => 'meta_value',
+                        'meta_key'       => '_museum_event_date',
+                        'order'          => 'ASC',
+                    ));
+
+                    if ($events->have_posts()) :
+                    ?>
+                <?php endif; ?>
+
+
+    <div class="museum-events">
+
+        <?php while ($events->have_posts()) : $events->the_post(); ?>
+
+            <?php
+                $event_date = get_post_meta(
+                    get_the_ID(),
+                    '_museum_event_date',
+                    true
+                );
+
+                $event_content = get_post_field(
+                    'post_content',
+                    get_the_ID()
+                );
+
+                $event_description = wp_strip_all_tags(
+                    $event_content
+                );
+                ?>
+
+                <article class="museum-event-card">
+                    <?php
+                        $event_content = get_post_field(
+                            'post_content',
+                            get_the_ID()
+                        );
+
+                        $event_image = '';
+
+                        if (preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $event_content, $matches)) {
+                            $event_image = $matches[1];
+                        }
+                        ?>
+
+                        <?php if ($event_image) : ?>
+
+                            <div class="museum-event-image">
+                                <img
+                                    src="<?php echo esc_url($event_image); ?>"
+                                    alt="<?php echo esc_attr(get_the_title()); ?>"
+                                >
+                            </div>
+
+                        <?php endif; ?>
+
+                    <?php
+                        $event_image = get_the_post_thumbnail_url(
+                            get_the_ID(),
+                            'large'
+                        );
+                        ?>
+
+                        <?php if (has_post_thumbnail()) : ?>
+
+                            <div class="museum-event-image">
+                                <?php the_post_thumbnail('large'); ?>
+                            </div>
+
+                        <?php endif; ?>
+
+                    <div class="museum-event-content">
+
+                        <h2 class="museum-event-title">
+                            <?php the_title(); ?>
+                        </h2>
+
+                        <?php if ($event_date) : ?>
+
+                            <div class="museum-event-date">
+
+                                <span class="museum-event-date-icon">📅</span>
+
+                                <?php
+                                echo esc_html(
+                                    date_i18n(
+                                        'd F Y г. в H:i',
+                                        strtotime($event_date)
+                                    )
+                                );
+                                ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                        <div class="museum-event-description">
+                            <?php echo wp_kses_post($event_description); ?>
+                        </div>
+
+                    </div>
+
+                </article>
+
+            <?php endwhile; ?>
+
+        </div>
+
+    <?php
+        wp_reset_postdata();
+    endif;
+    ?>
 
         </div>
 

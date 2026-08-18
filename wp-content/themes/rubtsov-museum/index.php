@@ -1,10 +1,20 @@
 <?php
 get_header();
+
+$museum_home_background = get_option('museum_home_background', '');
 ?>
 
 <main class="museum-home">
 
-    <section class="museum-hero">
+    <section
+        class="museum-hero"
+        style="background-image:
+            linear-gradient(
+                rgba(20, 18, 15, 0.55),
+                rgba(20, 18, 15, 0.55)
+            ),
+            url('<?php echo esc_url(get_option('museum_home_background', '')); ?>');"
+    >
 
         <div class="museum-hero-content">
 

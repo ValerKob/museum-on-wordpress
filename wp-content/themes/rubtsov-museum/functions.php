@@ -113,6 +113,53 @@ add_action(
 );
 
 /*
+ * Мероприятия музея
+ */
+function rubtsov_register_museum_events() {
+
+    register_post_type('museum_event', array(
+
+        'labels' => array(
+            'name'               => 'Мероприятия',
+            'singular_name'      => 'Мероприятие',
+            'add_new'            => 'Добавить мероприятие',
+            'add_new_item'       => 'Добавить новое мероприятие',
+            'edit_item'          => 'Редактировать мероприятие',
+            'new_item'           => 'Новое мероприятие',
+            'view_item'          => 'Посмотреть мероприятие',
+            'search_items'       => 'Найти мероприятие',
+            'not_found'          => 'Мероприятия не найдены',
+            'menu_name'          => 'Мероприятия',
+        ),
+
+        'public' => true,
+
+        'menu_icon' => 'dashicons-calendar-alt',
+
+        'supports' => array(
+            'title',
+            'editor',
+            'thumbnail',
+        ),
+
+        'has_archive' => false,
+
+        'rewrite' => array(
+            'slug' => 'museum-events',
+        ),
+
+        'show_in_rest' => true,
+
+    ));
+
+}
+
+add_action(
+    'init',
+    'rubtsov_register_museum_events'
+);
+
+/*
  * Страница настроек музея
  */
 function rubtsov_museum_settings_page() {
@@ -365,6 +412,46 @@ function rubtsov_museum_settings_html() {
                             </p>
                         </td>
                     </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="museum_home_background">
+                                Фон главного блока
+                            </label>
+                        </th>
+
+                        <td>
+
+                            <?php
+                            $museum_home_background = get_option(
+                                'museum_home_background',
+                                ''
+                            );
+                            ?>
+
+                            <input
+                                type="text"
+                                id="museum_home_background"
+                                name="museum_home_background"
+                                value="<?php echo esc_attr(
+                                    $museum_home_background
+                                ); ?>"
+                                class="regular-text"
+                            >
+
+                            <button
+                                type="button"
+                                class="button"
+                                id="museum_home_background_button"
+                            >
+                                Выбрать изображение
+                            </button>
+
+                            <p class="description">
+                                Выберите фотографию из медиатеки WordPress.
+                            </p>
+
+                        </td>
+                    </tr>
 
                 </table>
 
@@ -564,6 +651,17 @@ function rubtsov_museum_save_settings() {
         );
 
     }
+
+    if (isset($_POST['museum_home_background'])) {
+
+    update_option(
+        'museum_home_background',
+        esc_url_raw(
+            $_POST['museum_home_background']
+        )
+    );
+
+}
 
 }
 
@@ -1301,4 +1399,448 @@ function rubtsov_show_child_subsections($content) {
 add_filter(
     'the_content',
     'rubtsov_show_child_subsections'
+);
+
+function rubtsov_museum_admin_media() {
+
+    $screen = get_current_screen();
+
+    if (
+        $screen &&
+        $screen->id === 'toplevel_page_rubtsov-museum-settings'
+    ) {
+
+        wp_enqueue_media();
+
+        wp_enqueue_script(
+            'rubtsov-museum-admin-media',
+            get_template_directory_uri() . '/assets/js/museum-admin-media.js',
+            array('jquery'),
+            '1.0',
+            true
+        );
+
+    }
+
+}
+
+add_action(
+    'admin_enqueue_scripts',
+    'rubtsov_museum_admin_media'
+);
+
+/*
+ * Поле даты мероприятия
+ */
+function rubtsov_event_date_metabox() {
+
+    add_meta_box(
+        'rubtsov_event_date',
+        'Дата мероприятия',
+        'rubtsov_event_date_metabox_html',
+        'museum_event',
+        'side',
+        'high'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_event_date_metabox'
+);
+
+
+/*
+ * Вывод поля даты
+ */
+function rubtsov_event_date_metabox_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_event_date',
+        'rubtsov_event_date_nonce'
+    );
+
+    $event_date = get_post_meta(
+        $post->ID,
+        '_museum_event_date',
+        true
+    );
+
+    ?>
+
+    <input
+        type="datetime-local"
+        name="museum_event_date"
+        value="<?php echo esc_attr($event_date); ?>"
+        style="width:100%;"
+    >
+
+    <p class="description">
+        Укажите дату и время проведения мероприятия.
+    </p>
+
+    <?php
+}
+
+
+/*
+ * Сохранение даты
+ */
+function rubtsov_save_event_date($post_id) {
+
+    if (
+        !isset($_POST['rubtsov_event_date_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_event_date_nonce'],
+            'rubtsov_save_event_date'
+        )
+    ) {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    if (
+        get_post_type($post_id) !== 'museum_event'
+    ) {
+        return;
+    }
+
+    if (isset($_POST['museum_event_date'])) {
+
+        update_post_meta(
+            $post_id,
+            '_museum_event_date',
+            sanitize_text_field(
+                $_POST['museum_event_date']
+            )
+        );
+
+    }
+
+}
+
+add_action(
+    'save_post_museum_event',
+    'rubtsov_save_event_date'
+);
+
+/*
+ * Поле краткого описания мероприятия
+ */
+function rubtsov_event_description_metabox() {
+
+    add_meta_box(
+        'rubtsov_event_description',
+        'Краткое описание',
+        'rubtsov_event_description_metabox_html',
+        'museum_event',
+        'normal',
+        'high'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_event_description_metabox'
+);
+
+
+/*
+ * Вывод поля краткого описания
+ */
+function rubtsov_event_description_metabox_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_event_description',
+        'rubtsov_event_description_nonce'
+    );
+
+    $description = get_post_meta(
+        $post->ID,
+        '_museum_event_description',
+        true
+    );
+
+    ?>
+
+    <textarea
+        name="museum_event_description"
+        rows="5"
+        style="width:100%;"
+        placeholder="Кратко опишите мероприятие..."
+    ><?php echo esc_textarea($description); ?></textarea>
+
+    <p class="description">
+        Краткое описание, которое будет отображаться на карточке мероприятия.
+    </p>
+
+    <?php
+}
+
+
+/*
+ * Сохранение краткого описания
+ */
+function rubtsov_save_event_description($post_id) {
+
+    if (
+        !isset($_POST['rubtsov_event_description_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_event_description_nonce'],
+            'rubtsov_save_event_description'
+        )
+    ) {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    if (
+        get_post_type($post_id) !== 'museum_event'
+    ) {
+        return;
+    }
+
+    if (isset($_POST['museum_event_description'])) {
+
+        update_post_meta(
+            $post_id,
+            '_museum_event_description',
+            sanitize_textarea_field(
+                $_POST['museum_event_description']
+            )
+        );
+
+    }
+
+}
+
+add_action(
+    'save_post_museum_event',
+    'rubtsov_save_event_description'
+);
+
+/*
+ * Колонки мероприятий в админке
+ */
+function rubtsov_event_columns($columns) {
+
+    return array(
+        'cb'          => '<input type="checkbox" />',
+        'title'       => 'Название мероприятия',
+        'event_image' => 'Афиша',
+        'event_date'  => 'Дата и время',
+        'event_desc'  => 'Описание',
+        'date'        => 'Опубликовано',
+    );
+
+}
+
+add_filter(
+    'manage_museum_event_posts_columns',
+    'rubtsov_event_columns'
+);
+
+/*
+ * Содержимое колонок мероприятий
+ */
+function rubtsov_event_column_content($column, $post_id) {
+
+    /*
+     * Афиша
+     */
+    if ($column === 'event_image') {
+
+        $content = get_post_field(
+            'post_content',
+            $post_id
+        );
+
+        $image = '';
+
+        if (
+            preg_match(
+                '/<img[^>]+src=["\']([^"\']+)["\']/i',
+                $content,
+                $matches
+            )
+        ) {
+            $image = $matches[1];
+        }
+
+        if ($image) {
+
+            echo '<img
+                src="' . esc_url($image) . '"
+                style="
+                    width:80px;
+                    height:60px;
+                    object-fit:cover;
+                    border-radius:6px;
+                "
+            >';
+
+        } else {
+
+            echo '<span style="color:#999;">Нет фото</span>';
+
+        }
+
+    }
+
+
+    /*
+     * Дата и время
+     */
+    if ($column === 'event_date') {
+
+        $event_date = get_post_meta(
+            $post_id,
+            '_museum_event_date',
+            true
+        );
+
+        if ($event_date) {
+
+            echo esc_html(
+                date_i18n(
+                    'd F Y · H:i',
+                    strtotime($event_date)
+                )
+            );
+
+        } else {
+
+            echo '<span style="color:#999;">Не указана</span>';
+
+        }
+
+    }
+
+
+    /*
+     * Описание
+     */
+    if ($column === 'event_desc') {
+
+        $content = get_post_field(
+            'post_content',
+            $post_id
+        );
+
+        $description = wp_strip_all_tags($content);
+
+        if ($description) {
+
+            echo esc_html(
+                wp_trim_words(
+                    $description,
+                    15,
+                    '…'
+                )
+            );
+
+        } else {
+
+            echo '<span style="color:#999;">Нет описания</span>';
+
+        }
+
+    }
+
+}
+
+add_action(
+    'manage_museum_event_posts_custom_column',
+    'rubtsov_event_column_content',
+    10,
+    2
+);
+
+/*
+ * Сортировка мероприятий по дате
+ */
+function rubtsov_event_sortable_columns($columns) {
+
+    $columns['event_date'] = 'museum_event_date';
+
+    return $columns;
+
+}
+
+add_filter(
+    'manage_edit-museum_event_sortable_columns',
+    'rubtsov_event_sortable_columns'
+);
+
+
+function rubtsov_event_orderby($query) {
+
+    if (!is_admin()) {
+        return;
+    }
+
+    if (
+        !$query->is_main_query() ||
+        $query->get('post_type') !== 'museum_event'
+    ) {
+        return;
+    }
+
+    if (
+        $query->get('orderby') === 'museum_event_date'
+    ) {
+
+        $query->set(
+            'meta_key',
+            '_museum_event_date'
+        );
+
+        $query->set(
+            'orderby',
+            'meta_value'
+        );
+
+    }
+
+}
+
+add_action(
+    'pre_get_posts',
+    'rubtsov_event_orderby'
 );

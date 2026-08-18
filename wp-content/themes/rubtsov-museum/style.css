@@ -214,7 +214,7 @@ body {
   min-height: 52px;
   padding: 0 24px;
 
-  flex: 0 0 auto;
+  flex: 1 1 280px;
 
   color: #26231f;
   background: #ffffff;
@@ -237,6 +237,12 @@ body {
     background 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease;
+
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: center;
+  line-height: 1.4;
 }
 
 .museum-subsection-link:hover {
@@ -372,7 +378,7 @@ body > footer {
 /* Заголовки внутри подраздела */
 
 .museum-content h2 {
-  margin-top: 50px;
+  margin-top: 0;
   margin-bottom: 20px;
 }
 
@@ -598,5 +604,144 @@ body > footer {
 
   .museum-card h2 {
     font-size: 25px;
+  }
+}
+
+/* Фоновая фотография главного блока */
+
+.museum-hero {
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  background-color: #51483d;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+
+  color: #ffffff;
+}
+
+/* =========================================================
+   АФИША МЕРОПРИЯТИЙ
+   ========================================================= */
+
+.museum-events {
+  width: 100%;
+  max-width: 1100px;
+  margin: 50px auto 80px;
+
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.museum-event-card {
+  cursor: pointer;
+
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #d8d0c4;
+  border-radius: 14px;
+
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.museum-event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+/* Фотография */
+
+.museum-event-image {
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.museum-event-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Контент */
+
+.museum-event-content {
+  padding: 28px 30px 32px;
+}
+
+.museum-event-title {
+  margin: 0 0 14px;
+
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 600;
+
+  color: #26231f;
+}
+
+/* Дата */
+
+.museum-event-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 20px;
+  padding: 9px 14px;
+
+  background: #f1eee8;
+  border: 1px solid #ddd6ca;
+  border-radius: 8px;
+
+  color: #62594e;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.museum-event-date-icon {
+  font-size: 15px;
+}
+
+/* Описание */
+
+.museum-event-description {
+  color: #5b554d;
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* Телефон */
+
+@media (max-width: 700px) {
+  .museum-events {
+    grid-template-columns: 1fr;
+    width: 100%;
+    margin: 35px auto 60px;
+    gap: 20px;
+  }
+
+  .museum-event-image {
+    max-height: 230px;
+  }
+
+  .museum-event-content {
+    padding: 22px;
+  }
+
+  .museum-event-title {
+    font-size: 24px;
   }
 }
