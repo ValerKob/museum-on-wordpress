@@ -11,6 +11,8 @@
 
 <?php wp_body_open(); ?>
 
+<?php if (get_option('museum_header_enabled', 1)) : ?>
+
 <header>
     <div class="site-header">
         <div class="site-logo">
@@ -36,3 +38,4 @@
         </div>
     </div>
 </header>
+<?php endif; ?>

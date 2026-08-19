@@ -18,6 +18,32 @@ add_action('wp_enqueue_scripts', 'rubtsov_museum_styles');
 
 
 /*
+ * Подключение медиатеки WordPress в настройках музея
+ */
+function rubtsov_museum_admin_scripts($hook) {
+
+    if ($hook !== 'toplevel_page_rubtsov-museum-settings') {
+        return;
+    }
+
+    wp_enqueue_media();
+
+    wp_enqueue_script(
+        'rubtsov-museum-admin',
+        get_template_directory_uri() . '/assets/js/admin.js',
+        array('jquery'),
+        '1.0',
+        true
+    );
+
+}
+
+add_action(
+    'admin_enqueue_scripts',
+    'rubtsov_museum_admin_scripts'
+);
+
+/*
  * Разделы музея
  */
 function rubtsov_register_museum_sections() {
@@ -202,6 +228,20 @@ function rubtsov_museum_settings_html() {
             ?>
 
             <h2>Header</h2>
+            <p>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="museum_header_enabled"
+                        value="1"
+                        <?php checked(
+                            get_option('museum_header_enabled', 1),
+                            1
+                        ); ?>
+                    >
+                    Показывать шапку сайта
+                </label>
+            </p>
 
             <table class="form-table">
 
@@ -453,9 +493,65 @@ function rubtsov_museum_settings_html() {
                         </td>
                     </tr>
 
+                    <tr>
+                        <th scope="row">
+                            <label for="museum_site_background">
+                                Общий фон сайта
+                            </label>
+                        </th>
+
+                        <td>
+
+                            <?php
+                            $museum_site_background = get_option(
+                                'museum_site_background',
+                                ''
+                            );
+                            ?>
+
+                            <input
+                                type="text"
+                                id="museum_site_background"
+                                name="museum_site_background"
+                                value="<?php echo esc_attr(
+                                    $museum_site_background
+                                ); ?>"
+                                class="regular-text"
+                            >
+
+                            <button
+                                type="button"
+                                class="button"
+                                id="museum_site_background_button"
+                            >
+                                Выбрать изображение
+                            </button>
+
+                            <p class="description">
+                                Общий фон всего сайта. Изображение будет неподвижным,
+                                а содержимое страниц будет прокручиваться поверх него.
+                            </p>
+
+                        </td>
+                    </tr>
+
                 </table>
 
             <h2>Footer</h2>
+            <p>
+                <label>
+                    <input
+                        type="checkbox"
+                        name="museum_footer_enabled"
+                        value="1"
+                        <?php checked(
+                            get_option('museum_footer_enabled', 1),
+                            1
+                        ); ?>
+                    >
+                    Показывать подвал сайта
+                </label>
+            </p>
 
             <table class="form-table">
 
@@ -654,14 +750,59 @@ function rubtsov_museum_save_settings() {
 
     if (isset($_POST['museum_home_background'])) {
 
-    update_option(
-        'museum_home_background',
-        esc_url_raw(
-            $_POST['museum_home_background']
-        )
-    );
+        update_option(
+            'museum_home_background',
+            esc_url_raw(
+                $_POST['museum_home_background']
+            )
+        );
+        
 
-}
+    }
+
+    if (isset($_POST['museum_site_background'])) {
+
+        update_option(
+            'museum_site_background',
+            esc_url_raw(
+                $_POST['museum_site_background']
+            )
+        );
+
+    }
+    
+    if (isset($_POST['museum_header_enabled'])) {
+
+        update_option(
+            'museum_header_enabled',
+            1
+        );
+
+    } else {
+
+        update_option(
+            'museum_header_enabled',
+            0
+        );
+
+    }
+
+
+    if (isset($_POST['museum_footer_enabled'])) {
+
+        update_option(
+            'museum_footer_enabled',
+            1
+        );
+
+    } else {
+
+        update_option(
+            'museum_footer_enabled',
+            0
+        );
+
+    }
 
 }
 
@@ -1843,4 +1984,523 @@ function rubtsov_event_orderby($query) {
 add_action(
     'pre_get_posts',
     'rubtsov_event_orderby'
+);
+
+/*
+ * Вопросы квиза
+ */
+function rubtsov_register_quiz_questions() {
+
+    register_post_type('quiz_question', array(
+
+        'labels' => array(
+            'name'          => 'Вопросы квиза',
+            'singular_name' => 'Вопрос квиза',
+            'add_new'       => 'Добавить вопрос',
+            'add_new_item'  => 'Добавить новый вопрос',
+            'edit_item'     => 'Редактировать вопрос',
+            'new_item'      => 'Новый вопрос',
+            'view_item'     => 'Посмотреть вопрос',
+            'search_items'  => 'Найти вопрос',
+            'not_found'     => 'Вопросы не найдены',
+            'menu_name'     => 'Вопросы квиза',
+        ),
+
+        'public' => true,
+
+        'show_ui' => true,
+
+        'menu_icon' => 'dashicons-editor-help',
+
+        'supports' => array(
+            'title',
+        ),
+
+        'show_in_rest' => true,
+        'rest_base' => 'quiz_question',
+
+    ));
+
+}
+
+add_action(
+    'init',
+    'rubtsov_register_quiz_questions'
+);
+
+function rubtsov_quiz_register_rest_fields() {
+
+    register_rest_field(
+        'quiz_question',
+        'quiz_data',
+        array(
+            'get_callback' => function ($post) {
+
+                $answers = array();
+
+                for ($i = 1; $i <= 4; $i++) {
+                    $answers[] = get_post_meta(
+                        $post['id'],
+                        '_quiz_answer_' . $i,
+                        true
+                    );
+                }
+
+                return array(
+                    'question' => get_post_meta(
+                        $post['id'],
+                        '_quiz_question',
+                        true
+                    ),
+                    'answers' => $answers,
+                    'correct' => (int) get_post_meta(
+                        $post['id'],
+                        '_quiz_correct_answer',
+                        true
+                    ),
+                );
+            },
+            'schema' => null,
+        )
+    );
+
+}
+
+add_action(
+    'rest_api_init',
+    'rubtsov_quiz_register_rest_fields'
+);
+
+/*
+ * Поля вопроса квиза
+ */
+function rubtsov_quiz_question_metabox() {
+
+    add_meta_box(
+        'rubtsov_quiz_question_fields',
+        'Настройки вопроса',
+        'rubtsov_quiz_question_fields_html',
+        'quiz_question',
+        'normal',
+        'high'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_quiz_question_metabox'
+);
+
+
+/*
+ * Вывод полей вопроса
+ */
+function rubtsov_quiz_question_fields_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_quiz_question',
+        'rubtsov_quiz_question_nonce'
+    );
+
+    $question = get_post_meta(
+        $post->ID,
+        '_quiz_question',
+        true
+    );
+
+    $answers = array();
+
+    for ($i = 1; $i <= 4; $i++) {
+
+        $answers[$i] = get_post_meta(
+            $post->ID,
+            '_quiz_answer_' . $i,
+            true
+        );
+
+    }
+
+    $correct = get_post_meta(
+        $post->ID,
+        '_quiz_correct_answer',
+        true
+    );
+
+    ?>
+
+    <p>
+        <label>
+            <strong>Текст вопроса</strong>
+        </label>
+    </p>
+
+    <textarea
+        name="quiz_question"
+        rows="4"
+        style="width:100%;"
+        placeholder="Введите текст вопроса..."
+    ><?php echo esc_textarea($question); ?></textarea>
+
+
+    <hr>
+
+
+    <?php for ($i = 1; $i <= 4; $i++) : ?>
+
+        <p>
+            <label>
+                <strong>
+                    Вариант ответа <?php echo $i; ?>
+                </strong>
+            </label>
+        </p>
+
+        <input
+            type="text"
+            name="quiz_answer_<?php echo $i; ?>"
+            value="<?php echo esc_attr($answers[$i]); ?>"
+            style="width:100%;"
+            placeholder="Введите вариант ответа..."
+        >
+
+    <?php endfor; ?>
+
+
+    <hr>
+
+
+    <p>
+        <label>
+            <strong>Правильный ответ</strong>
+        </label>
+    </p>
+
+    <select
+        name="quiz_correct_answer"
+        style="width:100%;"
+    >
+
+        <option value="">
+            — Выберите правильный ответ —
+        </option>
+
+        <?php for ($i = 1; $i <= 4; $i++) : ?>
+
+            <option
+                value="<?php echo $i; ?>"
+                <?php selected($correct, $i); ?>
+            >
+                Вариант <?php echo $i; ?>
+            </option>
+
+        <?php endfor; ?>
+
+    </select>
+
+    <?php
+}
+
+/*
+ * Сохранение вопроса квиза
+ */
+function rubtsov_save_quiz_question($post_id) {
+
+    if (
+        !isset($_POST['rubtsov_quiz_question_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_quiz_question_nonce'],
+            'rubtsov_save_quiz_question'
+        )
+    ) {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        get_post_type($post_id) !== 'quiz_question'
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+
+    /*
+     * Текст вопроса
+     */
+    if (isset($_POST['quiz_question'])) {
+
+        update_post_meta(
+            $post_id,
+            '_quiz_question',
+            sanitize_textarea_field(
+                $_POST['quiz_question']
+            )
+        );
+
+    }
+
+
+    /*
+     * Варианты ответов
+     */
+    for ($i = 1; $i <= 4; $i++) {
+
+        if (isset($_POST['quiz_answer_' . $i])) {
+
+            update_post_meta(
+                $post_id,
+                '_quiz_answer_' . $i,
+                sanitize_text_field(
+                    $_POST['quiz_answer_' . $i]
+                )
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Правильный ответ
+     */
+    if (isset($_POST['quiz_correct_answer'])) {
+
+        $correct_answer = absint(
+            $_POST['quiz_correct_answer']
+        );
+
+        if ($correct_answer >= 1 && $correct_answer <= 4) {
+
+            update_post_meta(
+                $post_id,
+                '_quiz_correct_answer',
+                $correct_answer
+            );
+
+        } else {
+
+            delete_post_meta(
+                $post_id,
+                '_quiz_correct_answer'
+            );
+
+        }
+
+    }
+
+}
+
+add_action(
+    'save_post_quiz_question',
+    'rubtsov_save_quiz_question'
+);
+
+/*
+ * JavaScript квиза
+ */
+function rubtsov_quiz_scripts() {
+
+    if (is_singular('museum_subsection') && get_the_ID() === 17) {
+
+        wp_enqueue_script(
+            'rubtsov-museum-quiz',
+            get_template_directory_uri() . '/assets/js/museum-quiz.js',
+            array(),
+            '1.0',
+            true
+        );
+
+    }
+
+}
+
+add_action(
+    'wp_enqueue_scripts',
+    'rubtsov_quiz_scripts'
+);
+
+/*
+ * Колонки в списке вопросов квиза
+ */
+
+function rubtsov_quiz_question_columns($columns) {
+
+    $new_columns = array();
+
+    $new_columns['cb'] = $columns['cb'];
+    $new_columns['title'] = 'Название';
+
+    $new_columns['quiz_question'] = 'Текст вопроса';
+    $new_columns['quiz_answer_1'] = 'Ответ 1';
+    $new_columns['quiz_answer_2'] = 'Ответ 2';
+    $new_columns['quiz_answer_3'] = 'Ответ 3';
+    $new_columns['quiz_answer_4'] = 'Ответ 4';
+    $new_columns['quiz_correct'] = 'Правильный ответ';
+
+    $new_columns['date'] = $columns['date'];
+
+    return $new_columns;
+}
+
+add_filter(
+    'manage_quiz_question_posts_columns',
+    'rubtsov_quiz_question_columns'
+);
+
+
+/*
+ * Заполняем колонки данными
+ */
+
+function rubtsov_quiz_question_column_content(
+    $column,
+    $post_id
+) {
+
+    switch ($column) {
+
+        case 'quiz_question':
+
+            echo esc_html(
+                get_post_meta(
+                    $post_id,
+                    '_quiz_question',
+                    true
+                )
+            );
+
+            break;
+
+
+        case 'quiz_answer_1':
+
+            echo esc_html(
+                get_post_meta(
+                    $post_id,
+                    '_quiz_answer_1',
+                    true
+                )
+            );
+
+            break;
+
+
+        case 'quiz_answer_2':
+
+            echo esc_html(
+                get_post_meta(
+                    $post_id,
+                    '_quiz_answer_2',
+                    true
+                )
+            );
+
+            break;
+
+
+        case 'quiz_answer_3':
+
+            echo esc_html(
+                get_post_meta(
+                    $post_id,
+                    '_quiz_answer_3',
+                    true
+                )
+            );
+
+            break;
+
+
+        case 'quiz_answer_4':
+
+            echo esc_html(
+                get_post_meta(
+                    $post_id,
+                    '_quiz_answer_4',
+                    true
+                )
+            );
+
+            break;
+
+
+        case 'quiz_correct':
+
+            $correct = get_post_meta(
+                $post_id,
+                '_quiz_correct_answer',
+                true
+            );
+
+            if ($correct) {
+
+                echo 'Вариант ' . esc_html($correct);
+
+            } else {
+
+                echo '—';
+
+            }
+
+            break;
+    }
+
+}
+
+add_action(
+    'manage_quiz_question_posts_custom_column',
+    'rubtsov_quiz_question_column_content',
+    10,
+    2
+);
+
+/*
+ * Общий фон сайта
+ */
+function rubtsov_museum_site_background() {
+
+    $background = get_option(
+        'museum_site_background',
+        ''
+    );
+
+    if (!$background) {
+        return;
+    }
+
+    ?>
+
+    <style>
+        body {
+            background-image: url('<?php echo esc_url($background); ?>');
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+
+    <?php
+}
+
+add_action(
+    'wp_head',
+    'rubtsov_museum_site_background'
 );

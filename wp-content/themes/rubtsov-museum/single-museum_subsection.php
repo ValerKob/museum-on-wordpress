@@ -81,16 +81,151 @@ get_header();
 
         <div class="museum-content">
 
-            <?php
-                while (have_posts()) :
-                    the_post();
+            <?php if (get_the_ID() === 17) : ?>
 
-                    if (get_post_type() !== 'museum_event') {
-                        the_content();
-                    }
+                <div class="rubtsov-quiz" id="rubtsov-quiz">
 
-                endwhile;
+                    <div class="rubtsov-quiz-intro">
+
+                        <h2>Квиз «По следам Н. Рубцова»</h2>
+
+                        <p>
+                            Проверьте свои знания о жизни, творчестве
+                            и судьбе Николая Рубцова.
+                        </p>
+
+                        <button type="button" id="rubtsov-quiz-start">
+                            Начать квиз
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="rubtsov-quiz-game"
+                        id="rubtsov-quiz-game"
+                        style="display:none;"
+                    >
+
+                        <?php
+
+                        $quiz_questions = new WP_Query(array(
+                            'post_type'      => 'quiz_question',
+                            'post_status'    => 'publish',
+                            'posts_per_page' => -1,
+                            'orderby'        => 'date',
+                            'order'          => 'ASC',
+                        ));
+
+                        ?>
+
+                        <?php if ($quiz_questions->have_posts()) : ?>
+
+                            <div class="rubtsov-quiz-questions">
+
+                                <?php
+                                $question_number = 1;
+                                ?>
+
+                                <?php while ($quiz_questions->have_posts()) : ?>
+
+                                    <?php
+                                    $quiz_questions->the_post();
+
+                                    $question_id = get_the_ID();
+
+                                    $question_text = get_post_meta(
+                                        $question_id,
+                                        '_quiz_question',
+                                        true
+                                    );
+
+                                    $answers = array();
+
+                                    for ($i = 1; $i <= 4; $i++) {
+
+                                        $answers[$i] = get_post_meta(
+                                            $question_id,
+                                            '_quiz_answer_' . $i,
+                                            true
+                                        );
+
+                                    }
+                                    ?>
+
+                                    <div
+                                        class="rubtsov-quiz-question"
+                                        data-question="<?php echo esc_attr($question_number); ?>"
+                                    >
+
+                                        <h3>
+                                            <?php echo esc_html($question_number); ?>.
+                                            <?php echo esc_html($question_text); ?>
+                                        </h3>
+
+                                        <div class="rubtsov-quiz-answers">
+
+                                            <?php for ($i = 1; $i <= 4; $i++) : ?>
+
+                                                <?php if (!empty($answers[$i])) : ?>
+
+                                                    <label class="rubtsov-quiz-answer">
+
+                                                        <input
+                                                            type="radio"
+                                                            name="quiz_question_<?php echo esc_attr($question_number); ?>"
+                                                            value="<?php echo esc_attr($i); ?>"
+                                                        >
+
+                                                        <span>
+                                                            <?php echo esc_html($answers[$i]); ?>
+                                                        </span>
+
+                                                    </label>
+
+                                                <?php endif; ?>
+
+                                            <?php endfor; ?>
+
+                                        </div>
+
+                                    </div>
+
+                                    <?php
+                                    $question_number++;
+                                    ?>
+
+                                <?php endwhile; ?>
+
+                            </div>
+
+                            <?php wp_reset_postdata(); ?>
+
+                        <?php else : ?>
+
+                            <p>
+                                Вопросы квиза пока не добавлены.
+                            </p>
+
+                        <?php endif; ?>
+
+                    </div>
+
+                </div>
+
+            <?php else : ?>
+
+                <?php 
+                    while (have_posts()) : 
+                        the_post(); 
+
+                        if (get_post_type() !== 'museum_event') { 
+                            the_content(); 
+                        } 
+
+                    endwhile;
                 ?>
+
+            <?php endif; ?>
 
                 <?php if (get_the_title() === 'Афиши мероприятий') : ?>
 

@@ -1,3 +1,5 @@
+<?php if (get_option('museum_footer_enabled', 1)) : ?>
+
 <footer>
     <div class="site-footer">
 
@@ -25,6 +27,7 @@
 
     </div>
 </footer>
+<?php endif; ?>
 
 <?php wp_footer(); ?>
 
