@@ -78,7 +78,11 @@ $museum_home_background = get_option('museum_home_background', '');
                 ?>
 
                 <a
-                    class="museum-card"
+                    class="museum-card <?php
+                        if (get_post_meta(get_the_ID(), '_museum_section_full_width', true)) {
+                            echo 'museum-card-full';
+                        }
+                    ?>"
                     href="<?php the_permalink(); ?>"
                 >
 

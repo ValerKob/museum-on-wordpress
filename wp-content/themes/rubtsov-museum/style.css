@@ -115,6 +115,10 @@ body {
   cursor: pointer;
 }
 
+.museum-card-full {
+  grid-column: 1 / -1;
+}
+
 .museum-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
@@ -243,6 +247,10 @@ body {
   word-break: break-word;
   text-align: center;
   line-height: 1.4;
+}
+
+.museum-subsection-link-full {
+  flex: 1 1 100%;
 }
 
 .museum-subsection-link:hover {
@@ -1584,4 +1592,8 @@ body::after {
     170px 170px;
 
   mix-blend-mode: multiply;
+}
+
+.museum-child-subsection-full {
+  flex-basis: 100%;
 }

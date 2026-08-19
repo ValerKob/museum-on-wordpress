@@ -40,7 +40,15 @@ get_header();
     </section>
 
 
-    <section class="museum-single-content">
+    <section class="museum-single-content <?php
+        echo get_post_meta(
+            get_the_ID(),
+            '_museum_section_full_width',
+            true
+        ) === '1'
+            ? 'museum-section-full-width'
+            : '';
+    ?>">
 
         <div class="museum-content">
 
@@ -99,7 +107,15 @@ get_header();
                                     href="<?php echo esc_url(
                                         get_permalink($subsection->ID)
                                     ); ?>"
-                                    class="museum-subsection-link"
+                                    class="museum-subsection-link <?php
+                                        echo get_post_meta(
+                                            $subsection->ID,
+                                            '_museum_subsection_full_width',
+                                            true
+                                        ) === '1'
+                                            ? 'museum-subsection-link-full'
+                                            : '';
+                                    ?>"
                                 >
                                     <?php echo esc_html(
                                         $subsection->post_title

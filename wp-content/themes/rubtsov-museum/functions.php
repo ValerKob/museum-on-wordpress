@@ -91,6 +91,128 @@ add_action(
 );
 
 /*
+ * Поле "Раздел на всю ширину"
+ */
+function rubtsov_section_full_width_metabox() {
+
+    add_meta_box(
+        'rubtsov_section_full_width',
+        'Настройки раздела',
+        'rubtsov_section_full_width_metabox_html',
+        'museum_section',
+        'side',
+        'default'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_section_full_width_metabox'
+);
+
+
+/*
+ * Содержимое поля
+ */
+function rubtsov_section_full_width_metabox_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_section_full_width',
+        'rubtsov_section_full_width_nonce'
+    );
+
+    $full_width = get_post_meta(
+        $post->ID,
+        '_museum_section_full_width',
+        true
+    );
+
+    ?>
+
+    <label>
+        <input
+            type="checkbox"
+            name="museum_section_full_width"
+            value="1"
+            <?php checked($full_width, '1'); ?>
+        >
+
+        Раздел на всю ширину
+    </label>
+
+    <p class="description">
+        Если включено, этот раздел будет занимать всю ширину блока.
+    </p>
+
+    <?php
+}
+
+
+/*
+ * Сохранение настройки
+ */
+function rubtsov_save_section_full_width($post_id) {
+
+    if (
+        !isset($_POST['rubtsov_section_full_width_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_section_full_width_nonce'],
+            'rubtsov_save_section_full_width'
+        )
+    ) {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        get_post_type($post_id) !== 'museum_section'
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    if (isset($_POST['museum_section_full_width'])) {
+
+        update_post_meta(
+            $post_id,
+            '_museum_section_full_width',
+            '1'
+        );
+
+    } else {
+
+        delete_post_meta(
+            $post_id,
+            '_museum_section_full_width'
+        );
+
+    }
+
+}
+
+add_action(
+    'save_post_museum_section',
+    'rubtsov_save_section_full_width'
+);
+
+/*
  * Подразделы музея
  */
 function rubtsov_register_museum_subsections() {
@@ -968,6 +1090,137 @@ add_action(
 );
 
 /*
+ * Настройка ширины подраздела
+ */
+function rubtsov_subsection_full_width_metabox() {
+
+    add_meta_box(
+        'rubtsov_subsection_full_width',
+        'Настройки подраздела',
+        'rubtsov_subsection_full_width_metabox_html',
+        'museum_subsection',
+        'side',
+        'default'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_subsection_full_width_metabox'
+);
+
+
+/*
+ * Содержимое поля
+ */
+function rubtsov_subsection_full_width_metabox_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_subsection_full_width',
+        'rubtsov_subsection_full_width_nonce'
+    );
+
+    $full_width = get_post_meta(
+        $post->ID,
+        '_museum_subsection_full_width',
+        true
+    );
+
+    ?>
+
+    <input
+        type="hidden"
+        name="museum_subsection_full_width"
+        value="0"
+    >
+
+    <label>
+
+        <input
+            type="checkbox"
+            name="museum_subsection_full_width"
+            value="1"
+            <?php checked($full_width, '1'); ?>
+        >
+
+        Подраздел на всю ширину
+
+    </label>
+
+    <p class="description">
+        Если включено, этот подраздел будет занимать всю ширину блока.
+    </p>
+
+    <?php
+}
+
+
+/*
+ * Сохранение настройки ширины подраздела
+ */
+function rubtsov_save_subsection_full_width($post_id) {
+
+    if (get_post_type($post_id) !== 'museum_subsection') {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        wp_is_post_revision($post_id)
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    if (
+        !isset($_POST['rubtsov_subsection_full_width_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_subsection_full_width_nonce'],
+            'rubtsov_save_subsection_full_width'
+        )
+    ) {
+        return;
+    }
+
+    $full_width = isset($_POST['museum_subsection_full_width'])
+        ? sanitize_text_field($_POST['museum_subsection_full_width'])
+        : '0';
+
+    if ($full_width !== '1') {
+        $full_width = '0';
+    }
+
+    update_post_meta(
+        $post_id,
+        '_museum_subsection_full_width',
+        $full_width
+    );
+}
+
+add_action(
+    'save_post',
+    'rubtsov_save_subsection_full_width',
+    99
+);
+
+/*
  * Колонки "Раздел музея" и "Родительский подраздел"
  */
 function rubtsov_subsection_columns($columns) {
@@ -1522,9 +1775,19 @@ function rubtsov_show_child_subsections($content) {
 
     foreach ($children as $child) {
 
-        $output .= '<a href="' . esc_url(
+       $output .= '<a href="' . esc_url(
             get_permalink($child->ID)
-        ) . '" class="museum-child-subsection">';
+        ) . '" class="museum-child-subsection ' .
+        (
+            get_post_meta(
+                $child->ID,
+                '_museum_subsection_full_width',
+                true
+            ) === '1'
+                ? 'museum-child-subsection-full'
+                : ''
+        ) .
+        '">';;
 
         $output .= esc_html($child->post_title);
 
