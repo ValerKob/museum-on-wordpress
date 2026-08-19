@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
 
     fetch(
-      "/WordPress/wordpress/wp-json/wp/v2/quiz_question?per_page=100&orderby=date&order=asc",
+      "/wordpress/wp-json/wp/v2/quiz_question?per_page=100&orderby=date&order=asc",
     )
       .then(function (response) {
         if (!response.ok) {
