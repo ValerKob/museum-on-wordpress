@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
 
     fetch(
-      "/wordpress/wp-json/wp/v2/quiz_question?per_page=100&orderby=date&order=asc",
+      "/WordPress/wordpress/wp-json/wp/v2/quiz_question?per_page=100&orderby=date&order=asc",
     )
       .then(function (response) {
         if (!response.ok) {
@@ -150,6 +150,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const question = questions[currentQuestion];
     const data = question.quiz_data;
 
+    const questionImage = data.image
+      ? `
+        <div class="rubtsov-quiz-question-image">
+          <img
+            src="${data.image}"
+            alt="Изображение к вопросу"
+          >
+        </div>
+      `
+      : "";
+
     const totalQuestions = questions.length;
 
     const progress = (currentQuestion / totalQuestions) * 100;
@@ -195,14 +206,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
             <div class="rubtsov-quiz-question">
 
-                <h2 class="rubtsov-quiz-question-title">
+              <h2 class="rubtsov-quiz-question-title">
 
-                    ${data.question}
+                  ${data.question}
 
-                </h2>
+              </h2>
 
+              ${questionImage}
 
-                <div class="rubtsov-quiz-answers">
+              <div class="rubtsov-quiz-answers">
 
                     ${data.answers
                       .map(function (answer, index) {

@@ -18,23 +18,59 @@ add_action('wp_enqueue_scripts', 'rubtsov_museum_styles');
 
 
 /*
- * Подключение медиатеки WordPress в настройках музея
+ * Подключение медиатеки WordPress
  */
 function rubtsov_museum_admin_scripts($hook) {
 
-    if ($hook !== 'toplevel_page_rubtsov-museum-settings') {
+    /*
+     * Страница настроек музея
+     */
+    if (
+        $hook === 'toplevel_page_rubtsov-museum-settings'
+    ) {
+
+        wp_enqueue_media();
+
+        wp_enqueue_script(
+            'rubtsov-museum-admin',
+            get_template_directory_uri() . '/assets/js/admin.js',
+            array('jquery'),
+            '1.0',
+            true
+        );
+
         return;
     }
 
-    wp_enqueue_media();
 
-    wp_enqueue_script(
-        'rubtsov-museum-admin',
-        get_template_directory_uri() . '/assets/js/admin.js',
-        array('jquery'),
-        '1.0',
-        true
-    );
+    /*
+     * Редактирование вопроса квиза
+     */
+    if (
+        $hook === 'post.php' ||
+        $hook === 'post-new.php'
+    ) {
+
+        $screen = get_current_screen();
+
+        if (
+            $screen &&
+            $screen->post_type === 'quiz_question'
+        ) {
+
+            wp_enqueue_media();
+
+            wp_enqueue_script(
+                'rubtsov-quiz-admin',
+                get_template_directory_uri() . '/assets/js/quiz-admin.js',
+                array('jquery'),
+                '1.0',
+                true
+            );
+
+        }
+
+    }
 
 }
 
@@ -2315,10 +2351,18 @@ function rubtsov_quiz_register_rest_fields() {
                         '_quiz_question',
                         true
                     ),
+
                     'answers' => $answers,
+
                     'correct' => (int) get_post_meta(
                         $post['id'],
                         '_quiz_correct_answer',
+                        true
+                    ),
+
+                    'image' => get_post_meta(
+                        $post['id'],
+                        '_quiz_question_image',
                         true
                     ),
                 );
@@ -2390,6 +2434,12 @@ function rubtsov_quiz_question_fields_html($post) {
         true
     );
 
+    $image = get_post_meta(
+        $post->ID,
+        '_quiz_question_image',
+        true
+    );
+
     ?>
 
     <p>
@@ -2405,7 +2455,50 @@ function rubtsov_quiz_question_fields_html($post) {
         placeholder="Введите текст вопроса..."
     ><?php echo esc_textarea($question); ?></textarea>
 
+    <hr>
 
+    <p>
+        <label>
+            <strong>Изображение вопроса</strong>
+        </label>
+    </p>
+
+    <input
+        type="text"
+        name="quiz_question_image"
+        id="quiz_question_image"
+        value="<?php echo esc_attr($image); ?>"
+        style="width:100%;"
+    >
+
+    <button
+        type="button"
+        class="button"
+        id="quiz_question_image_button"
+    >
+        Выбрать изображение
+    </button>
+
+    <?php if ($image) : ?>
+
+        <p style="margin-top:15px;">
+            <img
+                src="<?php echo esc_url($image); ?>"
+                style="
+                    max-width:300px;
+                    height:auto;
+                    display:block;
+                    border-radius:8px;
+                "
+            >
+        </p>
+
+    <?php endif; ?>
+
+    <p class="description">
+        Изображение необязательно. Если его не выбрать,
+        вопрос будет отображаться без фотографии.
+    </p>
     <hr>
 
 
@@ -2562,6 +2655,34 @@ function rubtsov_save_quiz_question($post_id) {
             delete_post_meta(
                 $post_id,
                 '_quiz_correct_answer'
+            );
+
+        }
+
+    }
+
+    /*
+    * Изображение вопроса
+    */
+    if (isset($_POST['quiz_question_image'])) {
+
+        $image = esc_url_raw(
+            $_POST['quiz_question_image']
+        );
+
+        if ($image) {
+
+            update_post_meta(
+                $post_id,
+                '_quiz_question_image',
+                $image
+            );
+
+        } else {
+
+            delete_post_meta(
+                $post_id,
+                '_quiz_question_image'
             );
 
         }

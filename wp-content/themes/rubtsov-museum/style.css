@@ -625,7 +625,7 @@ body > footer {
   text-align: center;
 
   background-color: #51483d;
-  background-position: center top;
+  background-position: center center;
   background-size: cover;
   background-repeat: no-repeat;
 
@@ -1596,4 +1596,34 @@ body::after {
 
 .museum-child-subsection-full {
   flex-basis: 100%;
+}
+
+/* =========================================================
+   ИЗОБРАЖЕНИЕ ВОПРОСА КВИЗА
+   ========================================================= */
+
+.rubtsov-quiz-question-image {
+  width: 100%;
+  margin: 0 0 30px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+  border-radius: 14px;
+  background: #f1eee8;
+  border: 1px solid #d8d0c4;
+}
+
+.rubtsov-quiz-question-image img {
+  display: block;
+
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+
+  max-height: 420px;
+
+  object-fit: contain;
 }
