@@ -18,19 +18,30 @@ $museum_home_background = get_option('museum_home_background', '');
 
         <div class="museum-hero-content">
 
-            <p class="museum-subtitle">
-                <?php
-                echo esc_html(
+            <p
+                class="museum-subtitle"
+                style="font-size: <?php echo absint(
                     get_option(
-                        'museum_home_subtitle',
-                        'ВИРТУАЛЬНЫЙ ШКОЛЬНЫЙ МУЗЕЙ'
+                        'museum_home_subtitle_size',
+                        '14'
                     )
-                );
-                ?>
+                ); ?>px;"
+            >
+                <?php echo esc_html(get_option(
+                    'museum_home_subtitle',
+                    'ВИРТУАЛЬНЫЙ ШКОЛЬНЫЙ МУЗЕЙ'
+                )); ?>
             </p>
 
-            <h1>
-                <?php
+            <h1
+                style="font-size: <?php echo absint(
+                    get_option(
+                        'museum_home_title_size',
+                        '90'
+                    )
+                ); ?>px;"
+            >
+                <?php 
                 echo esc_html(
                     get_option(
                         'museum_home_title',
@@ -40,7 +51,15 @@ $museum_home_background = get_option('museum_home_background', '');
                 ?>
             </h1>
 
-            <p class="museum-description">
+            <p
+                class="museum-description"
+                style="font-size: <?php echo absint(
+                    get_option(
+                        'museum_home_description_size',
+                        '22'
+                    )
+                ); ?>px;"
+            >
                 <?php
                 echo esc_html(
                     get_option(

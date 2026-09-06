@@ -554,6 +554,29 @@ function rubtsov_museum_settings_html() {
                             <p class="description">
                                 Надпись над главным названием музея.
                             </p>
+                            <p>
+                                <label for="museum_home_subtitle_size">
+                                    Размер шрифта:
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="museum_home_subtitle_size"
+                                    name="museum_home_subtitle_size"
+                                    value="<?php echo esc_attr(
+                                        get_option(
+                                            'museum_home_subtitle_size',
+                                            '14'
+                                        )
+                                    ); ?>"
+                                    min="8"
+                                    max="100"
+                                    step="1"
+                                    style="width:100px;"
+                                >
+
+                                px
+                            </p>
                         </td>
                     </tr>
 
@@ -581,6 +604,29 @@ function rubtsov_museum_settings_html() {
                             <p class="description">
                                 Главное название на первом экране.
                             </p>
+                            <p>
+                                <label for="museum_home_title_size">
+                                    Размер шрифта:
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="museum_home_title_size"
+                                    name="museum_home_title_size"
+                                    value="<?php echo esc_attr(
+                                        get_option(
+                                            'museum_home_title_size',
+                                            '90'
+                                        )
+                                    ); ?>"
+                                    min="20"
+                                    max="150"
+                                    step="1"
+                                    style="width:100px;"
+                                >
+
+                                px
+                            </p>
                         </td>
                     </tr>
 
@@ -607,6 +653,29 @@ function rubtsov_museum_settings_html() {
 
                             <p class="description">
                                 Текст под главным названием.
+                            </p>
+                            <p>
+                                <label for="museum_home_description_size">
+                                    Размер шрифта:
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="museum_home_description_size"
+                                    name="museum_home_description_size"
+                                    value="<?php echo esc_attr(
+                                        get_option(
+                                            'museum_home_description_size',
+                                            '22'
+                                        )
+                                    ); ?>"
+                                    min="10"
+                                    max="60"
+                                    step="1"
+                                    style="width:100px;"
+                                >
+
+                                px
                             </p>
                         </td>
                     </tr>
@@ -884,6 +953,13 @@ function rubtsov_museum_save_settings() {
 
     }
 
+    if (isset($_POST['museum_home_subtitle_size'])) {
+        update_option(
+            'museum_home_subtitle_size',
+            absint($_POST['museum_home_subtitle_size'])
+        );
+    }
+
     if (isset($_POST['museum_home_title'])) {
 
         update_option(
@@ -895,6 +971,13 @@ function rubtsov_museum_save_settings() {
 
     }
 
+    if (isset($_POST['museum_home_title_size'])) {
+        update_option(
+            'museum_home_title_size',
+            absint($_POST['museum_home_title_size'])
+        );
+    }
+
     if (isset($_POST['museum_home_description'])) {
 
         update_option(
@@ -904,6 +987,13 @@ function rubtsov_museum_save_settings() {
             )
         );
 
+    }
+    
+    if (isset($_POST['museum_home_description_size'])) {
+        update_option(
+            'museum_home_description_size',
+            absint($_POST['museum_home_description_size'])
+        );
     }
 
     if (isset($_POST['museum_home_background'])) {
