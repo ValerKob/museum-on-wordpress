@@ -1960,6 +1960,37 @@ add_action(
 );
 
 /*
+ * Подключение медиатеки и JS для файлов мероприятий
+ */
+function rubtsov_event_files_admin_scripts() {
+
+    $screen = get_current_screen();
+
+    if (
+        !$screen ||
+        $screen->post_type !== 'museum_event'
+    ) {
+        return;
+    }
+
+    wp_enqueue_media();
+
+    wp_enqueue_script(
+        'rubtsov-event-files',
+        get_template_directory_uri() . '/assets/js/event-files.js',
+        array('jquery'),
+        '1.0',
+        true
+    );
+
+}
+
+add_action(
+    'admin_enqueue_scripts',
+    'rubtsov_event_files_admin_scripts'
+);
+
+/*
  * Поле даты мероприятия
  */
 function rubtsov_event_date_metabox() {
@@ -2071,6 +2102,192 @@ add_action(
     'save_post_museum_event',
     'rubtsov_save_event_date'
 );
+
+/*
+ * Файлы мероприятия
+ */
+function rubtsov_event_files_metabox() {
+
+    add_meta_box(
+        'rubtsov_event_files',
+        'Файлы для скачивания',
+        'rubtsov_event_files_metabox_html',
+        'museum_event',
+        'normal',
+        'high'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_event_files_metabox'
+);
+
+
+/*
+ * Вывод файлов мероприятия
+ */
+function rubtsov_event_files_metabox_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_event_files',
+        'rubtsov_event_files_nonce'
+    );
+
+    $files = get_post_meta(
+        $post->ID,
+        '_museum_event_files',
+        true
+    );
+
+    if (!is_array($files)) {
+        $files = array();
+    }
+
+    ?>
+
+    <div id="rubtsov-event-files">
+
+        <?php foreach ($files as $index => $file) : ?>
+
+            <div
+                class="rubtsov-event-file"
+                style="
+                    display:flex;
+                    gap:10px;
+                    align-items:center;
+                    margin-bottom:10px;
+                "
+            >
+
+                <input
+                    type="text"
+                    name="museum_event_files[<?php echo esc_attr($index); ?>][url]"
+                    value="<?php echo esc_url($file['url'] ?? ''); ?>"
+                    class="regular-text"
+                    readonly
+                >
+
+                <input
+                    type="text"
+                    name="museum_event_files[<?php echo esc_attr($index); ?>][name]"
+                    value="<?php echo esc_attr($file['name'] ?? ''); ?>"
+                    placeholder="Название файла"
+                    class="regular-text"
+                >
+
+                <button
+                    type="button"
+                    class="button rubtsov-remove-event-file"
+                >
+                    Удалить
+                </button>
+
+            </div>
+
+        <?php endforeach; ?>
+
+    </div>
+
+    <button
+        type="button"
+        class="button button-primary"
+        id="rubtsov-add-event-file"
+    >
+        Добавить файл
+    </button>
+
+    <p class="description">
+        К мероприятию можно прикрепить любое количество файлов.
+    </p>
+
+    <?php
+}
+
+/*
+ * Сохранение файлов мероприятия
+ */
+function rubtsov_save_event_files($post_id) {
+
+    if (
+        !isset($_POST['rubtsov_event_files_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_event_files_nonce'],
+            'rubtsov_save_event_files'
+        )
+    ) {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    if (
+        get_post_type($post_id) !== 'museum_event'
+    ) {
+        return;
+    }
+
+    $files = isset($_POST['museum_event_files'])
+        ? $_POST['museum_event_files']
+        : array();
+
+    $clean_files = array();
+
+    if (is_array($files)) {
+
+        foreach ($files as $file) {
+
+            $url = isset($file['url'])
+                ? esc_url_raw($file['url'])
+                : '';
+
+            $name = isset($file['name'])
+                ? sanitize_text_field($file['name'])
+                : '';
+
+            if (!$url) {
+                continue;
+            }
+
+            $clean_files[] = array(
+                'url'  => $url,
+                'name' => $name,
+            );
+
+        }
+
+    }
+
+    update_post_meta(
+        $post_id,
+        '_museum_event_files',
+        $clean_files
+    );
+
+}
+
+add_action(
+    'save_post_museum_event',
+    'rubtsov_save_event_files'
+);
+
 
 /*
  * Поле краткого описания мероприятия

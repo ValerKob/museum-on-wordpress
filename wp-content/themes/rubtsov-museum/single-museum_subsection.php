@@ -334,7 +334,59 @@ get_header();
                             <?php echo wp_kses_post($event_description); ?>
                         </div>
 
-                    </div>
+                        <?php
+                        $event_files = get_post_meta(
+                            get_the_ID(),
+                            '_museum_event_files',
+                            true
+                        );
+
+                        if (
+                            is_array($event_files) &&
+                            !empty($event_files)
+                        ) :
+                        ?>
+
+                            <div class="museum-event-files">
+
+                                <div class="museum-event-files-title">
+                                    Файлы для скачивания
+                                </div>
+
+                                <div class="museum-event-files-list">
+
+                                    <?php foreach ($event_files as $file) : ?>
+
+                                        <?php
+                                        if (empty($file['url'])) {
+                                            continue;
+                                        }
+
+                                        $file_name = !empty($file['name'])
+                                            ? $file['name']
+                                            : basename($file['url']);
+                                        ?>
+
+                                        <a
+                                            href="<?php echo esc_url($file['url']); ?>"
+                                            class="museum-event-file-download"
+                                            download
+                                            target="_blank"
+                                            rel="noopener"
+                                        >
+                                            ↓
+                                            <?php echo esc_html($file_name); ?>
+                                        </a>
+
+                                    <?php endforeach; ?>
+
+                                </div>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                        </div>
 
                 </article>
 

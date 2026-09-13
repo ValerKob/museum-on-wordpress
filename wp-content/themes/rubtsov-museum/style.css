@@ -1627,3 +1627,66 @@ body::after {
 
   object-fit: contain;
 }
+
+/* Кнопки скачивания файлов мероприятий */
+.museum-event-files {
+  margin-top: 25px;
+}
+
+.museum-event-files-title {
+  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.museum-event-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.museum-event-file-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+
+  padding: 10px 16px;
+
+  background: linear-gradient(135deg, #8b877d 0%, #817c70 45%, #726d61 100%);
+
+  color: #f4f0df !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.18),
+    0 2px 5px rgba(0, 0, 0, 0.12);
+
+  border-radius: 8px;
+  text-decoration: none !important;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.museum-event-file-download:hover {
+  background: linear-gradient(135deg, #989286 0%, #898376 45%, #797366 100%);
+
+  color: #ffffff !important;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.2),
+    0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+.museum-event-file-download:active {
+  transform: translateY(0);
+}
