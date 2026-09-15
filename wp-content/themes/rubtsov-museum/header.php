@@ -13,7 +13,21 @@
 
 <?php if (get_option('museum_header_enabled', 1)) : ?>
 
-<header>
+<?php
+$museum_header_transparent = get_option(
+    'museum_header_transparent',
+    0
+);
+
+$museum_header_opacity = get_option(
+    'museum_header_logo_opacity',
+    100
+);
+?>
+
+<header
+    class="<?php echo $museum_header_transparent ? 'museum-header-transparent' : ''; ?>"
+>
     <div class="site-header">
         <?php
             $museum_header_logo = get_option(
@@ -35,6 +49,7 @@
 
                         <img
                             src="<?php echo esc_url($museum_header_logo); ?>"
+                            style="opacity: <?php echo esc_attr($museum_header_opacity / 100); ?>;"
                             alt="<?php echo esc_attr(
                                 get_option(
                                     'museum_header_title',

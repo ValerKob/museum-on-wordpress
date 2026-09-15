@@ -9,7 +9,7 @@ function rubtsov_museum_styles() {
         'rubtsov-museum-style',
         get_stylesheet_uri(),
         array(),
-        '1.1'
+        '1.2'
     );
 
 }
@@ -534,6 +534,67 @@ function rubtsov_museum_settings_html() {
                         </p>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">
+                        <label for="museum_header_transparent">
+                            Фон Header
+                        </label>
+                    </th>
+
+                    <td>
+                        <label>
+                            <input
+                                type="checkbox"
+                                id="museum_header_transparent"
+                                name="museum_header_transparent"
+                                value="1"
+                                <?php checked(
+                                    get_option('museum_header_transparent', 0),
+                                    1
+                                ); ?>
+                            >
+
+                            Сделать фон Header прозрачным
+                        </label>
+
+                        <p class="description">
+                            При включении фон шапки сайта становится прозрачным.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        <label for="museum_header_logo_opacity">
+                            Прозрачность логотипа
+                        </label>
+                    </th>
+
+                    <td>
+                        <input
+                            type="range"
+                            id="museum_header_logo_opacity"
+                            name="museum_header_logo_opacity"
+                            min="0"
+                            max="100"
+                            step="1"
+                            value="<?php echo esc_attr(
+                                get_option('museum_header_logo_opacity', 100)
+                            ); ?>"
+                            style="width: 250px; vertical-align: middle;"
+                        >
+
+                        <span id="museum_header_logo_opacity_value">
+                            <?php echo esc_html(
+                                get_option('museum_header_logo_opacity', 100)
+                            ); ?>%
+                        </span>
+
+                        <p class="description">
+                            100% — логотип полностью видимый, 0% — полностью прозрачный.
+                        </p>
+                    </td>
+                </tr>
             </table>
 
             <hr>
@@ -995,6 +1056,37 @@ function rubtsov_museum_save_settings() {
             'museum_header_logo_position',
             sanitize_text_field(
                 $_POST['museum_header_logo_position']
+            )
+        );
+
+    }
+
+    if (isset($_POST['museum_header_transparent'])) {
+
+        update_option(
+            'museum_header_transparent',
+            1
+        );
+
+    } else {
+
+        update_option(
+            'museum_header_transparent',
+            0
+        );
+
+    }
+
+    if (isset($_POST['museum_header_logo_opacity'])) {
+
+        update_option(
+            'museum_header_logo_opacity',
+            max(
+                0,
+                min(
+                    100,
+                    absint($_POST['museum_header_logo_opacity'])
+                )
             )
         );
 

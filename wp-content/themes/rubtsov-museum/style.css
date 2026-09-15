@@ -25,11 +25,26 @@ body {
 .site-header {
   width: 100%;
   padding: 25px 60px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #171614;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+
+  background: transparent !important;
   color: #ffffff;
+}
+
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
 }
 
 .site-logo {
@@ -1879,4 +1894,12 @@ body::after {
   right: 20px;
   top: 50%;
   transform: translateY(-50%);
+}
+
+.museum-header-transparent {
+  background: transparent !important;
+}
+
+.museum-header-transparent .site-header {
+  background: transparent !important;
 }
