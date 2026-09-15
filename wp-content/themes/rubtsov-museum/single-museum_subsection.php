@@ -311,6 +311,27 @@ get_header();
                             <?php the_title(); ?>
                         </h2>
 
+                        <?php
+                            $event_status = get_post_meta(
+                                get_the_ID(),
+                                '_museum_event_status',
+                                true
+                            );
+
+                            if ($event_status === 'not_actual') {
+                                $status_class = 'museum-event-status-not-actual';
+                                $status_text = 'НЕАКТУАЛЬНО';
+                            } else {
+                                $status_class = 'museum-event-status-actual';
+                                $status_text = 'АКТУАЛЬНО';
+                            }
+                            ?>
+
+                            <div class="museum-event-status <?php echo esc_attr($status_class); ?>">
+                                <span class="museum-event-status-dot"></span>
+                                <?php echo esc_html($status_text); ?>
+                            </div>
+
                         <?php if ($event_date) : ?>
 
                             <div class="museum-event-date">
@@ -333,6 +354,36 @@ get_header();
                         <div class="museum-event-description">
                             <?php echo wp_kses_post($event_description); ?>
                         </div>
+
+                        <?php
+                            $details_enabled = get_post_meta(
+                                get_the_ID(),
+                                '_museum_event_details_enabled',
+                                true
+                            );
+
+                            $details_subsection_id = get_post_meta(
+                                get_the_ID(),
+                                '_museum_event_details_subsection',
+                                true
+                            );
+
+                            if (
+                                $details_enabled === '1' &&
+                                $details_subsection_id
+                            ) :
+                            ?>
+
+                                <a
+                                    href="<?php echo esc_url(
+                                        get_permalink($details_subsection_id)
+                                    ); ?>"
+                                    class="museum-event-details-button"
+                                >
+                                    Подробнее
+                                </a>
+
+                            <?php endif; ?>
 
                         <?php
                         $event_files = get_post_meta(

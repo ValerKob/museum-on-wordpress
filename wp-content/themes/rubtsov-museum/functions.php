@@ -456,7 +456,85 @@ function rubtsov_museum_settings_html() {
                         </p>
                     </td>
                 </tr>
-                        </table>
+                <tr>
+                    <th scope="row">
+                        <label for="museum_header_logo">
+                            Логотип
+                        </label>
+                    </th>
+
+                    <td>
+                        <input
+                            type="text"
+                            id="museum_header_logo"
+                            name="museum_header_logo"
+                            value="<?php echo esc_attr(
+                                get_option('museum_header_logo', '')
+                            ); ?>"
+                            class="regular-text"
+                        >
+
+                        <button
+                            type="button"
+                            class="button"
+                            id="museum_header_logo_button"
+                        >
+                            Выбрать логотип
+                        </button>
+
+                        <p class="description">
+                            Логотип, который будет отображаться в шапке сайта.
+                        </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <th scope="row">
+                        <label for="museum_header_logo_position">
+                            Положение логотипа
+                        </label>
+                    </th>
+
+                    <td>
+                        <?php
+                        $logo_position = get_option(
+                            'museum_header_logo_position',
+                            'left'
+                        );
+                        ?>
+
+                        <select
+                            id="museum_header_logo_position"
+                            name="museum_header_logo_position"
+                        >
+                            <option
+                                value="left"
+                                <?php selected($logo_position, 'left'); ?>
+                            >
+                                Слева
+                            </option>
+
+                            <option
+                                value="center"
+                                <?php selected($logo_position, 'center'); ?>
+                            >
+                                По центру
+                            </option>
+
+                            <option
+                                value="right"
+                                <?php selected($logo_position, 'right'); ?>
+                            >
+                                Справа
+                            </option>
+                        </select>
+
+                        <p class="description">
+                            Выберите, где должен находиться логотип в шапке сайта.
+                        </p>
+                    </td>
+                </tr>
+            </table>
 
             <hr>
 
@@ -888,6 +966,7 @@ function rubtsov_museum_save_settings() {
         );
 
     }
+    
     if (isset($_POST['museum_header_label'])) {
 
         update_option(
@@ -898,6 +977,29 @@ function rubtsov_museum_save_settings() {
         );
 
     }
+
+    if (isset($_POST['museum_header_logo'])) {
+
+        update_option(
+            'museum_header_logo',
+            esc_url_raw(
+                $_POST['museum_header_logo']
+            )
+        );
+
+    }
+
+    if (isset($_POST['museum_header_logo_position'])) {
+
+        update_option(
+            'museum_header_logo_position',
+            sanitize_text_field(
+                $_POST['museum_header_logo_position']
+            )
+        );
+
+    }
+
     if (isset($_POST['museum_footer_title'])) {
 
         update_option(
@@ -2288,6 +2390,329 @@ add_action(
     'rubtsov_save_event_files'
 );
 
+/*
+ * Актуальность мероприятия
+ */
+function rubtsov_event_status_metabox() {
+
+    add_meta_box(
+        'rubtsov_event_status',
+        'Актуальность мероприятия',
+        'rubtsov_event_status_metabox_html',
+        'museum_event',
+        'side',
+        'default'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_event_status_metabox'
+);
+
+
+/*
+ * Вывод выбора актуальности
+ */
+function rubtsov_event_status_metabox_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_event_status',
+        'rubtsov_event_status_nonce'
+    );
+
+    $status = get_post_meta(
+        $post->ID,
+        '_museum_event_status',
+        true
+    );
+
+    if (!$status) {
+        $status = 'actual';
+    }
+
+    ?>
+
+    <p>
+        <label>
+            <input
+                type="radio"
+                name="museum_event_status"
+                value="actual"
+                <?php checked($status, 'actual'); ?>
+            >
+
+            Актуально
+        </label>
+    </p>
+
+    <p>
+        <label>
+            <input
+                type="radio"
+                name="museum_event_status"
+                value="not_actual"
+                <?php checked($status, 'not_actual'); ?>
+            >
+
+            Неактуально
+        </label>
+    </p>
+
+    <?php
+}
+
+
+/*
+ * Сохранение актуальности
+ */
+function rubtsov_save_event_status($post_id) {
+
+    if (
+        !isset($_POST['rubtsov_event_status_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_event_status_nonce'],
+            'rubtsov_save_event_status'
+        )
+    ) {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    if (
+        get_post_type($post_id) !== 'museum_event'
+    ) {
+        return;
+    }
+
+    $status = isset($_POST['museum_event_status'])
+        ? sanitize_text_field(
+            $_POST['museum_event_status']
+        )
+        : 'actual';
+
+    if (
+        !in_array(
+            $status,
+            array('actual', 'not_actual'),
+            true
+        )
+    ) {
+        $status = 'actual';
+    }
+
+    update_post_meta(
+        $post_id,
+        '_museum_event_status',
+        $status
+    );
+
+}
+
+add_action(
+    'save_post_museum_event',
+    'rubtsov_save_event_status'
+);
+
+
+/*
+ * Кнопка «Подробнее» для мероприятия
+ */
+function rubtsov_event_details_metabox() {
+
+    add_meta_box(
+        'rubtsov_event_details',
+        'Подробнее',
+        'rubtsov_event_details_metabox_html',
+        'museum_event',
+        'side',
+        'default'
+    );
+
+}
+
+add_action(
+    'add_meta_boxes',
+    'rubtsov_event_details_metabox'
+);
+
+
+/*
+ * Вывод настроек «Подробнее»
+ */
+function rubtsov_event_details_metabox_html($post) {
+
+    wp_nonce_field(
+        'rubtsov_save_event_details',
+        'rubtsov_event_details_nonce'
+    );
+
+    $enabled = get_post_meta(
+        $post->ID,
+        '_museum_event_details_enabled',
+        true
+    );
+
+    $subsection_id = get_post_meta(
+        $post->ID,
+        '_museum_event_details_subsection',
+        true
+    );
+
+    $subsections = get_posts(array(
+        'post_type'      => 'museum_subsection',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+    ));
+
+    ?>
+
+    <p>
+        <label>
+            <input
+                type="checkbox"
+                name="museum_event_details_enabled"
+                value="1"
+                <?php checked($enabled, '1'); ?>
+            >
+
+            Показывать кнопку «Подробнее»
+        </label>
+    </p>
+
+    <p>
+        <label for="museum_event_details_subsection">
+            Подраздел:
+        </label>
+    </p>
+
+    <select
+        id="museum_event_details_subsection"
+        name="museum_event_details_subsection"
+        style="width:100%;"
+    >
+
+        <option value="0">
+            — Выберите подраздел —
+        </option>
+
+        <?php foreach ($subsections as $subsection) : ?>
+
+            <option
+                value="<?php echo esc_attr($subsection->ID); ?>"
+                <?php selected(
+                    $subsection_id,
+                    $subsection->ID
+                ); ?>
+            >
+                <?php echo esc_html(
+                    $subsection->post_title
+                ); ?>
+            </option>
+
+        <?php endforeach; ?>
+
+    </select>
+
+    <p class="description">
+        Выберите подраздел, на который будет вести кнопка «Подробнее».
+    </p>
+
+    <?php
+}
+
+
+/*
+ * Сохранение настроек «Подробнее»
+ */
+function rubtsov_save_event_details($post_id) {
+
+    if (
+        !isset($_POST['rubtsov_event_details_nonce'])
+    ) {
+        return;
+    }
+
+    if (
+        !wp_verify_nonce(
+            $_POST['rubtsov_event_details_nonce'],
+            'rubtsov_save_event_details'
+        )
+    ) {
+        return;
+    }
+
+    if (
+        defined('DOING_AUTOSAVE') &&
+        DOING_AUTOSAVE
+    ) {
+        return;
+    }
+
+    if (
+        !current_user_can('edit_post', $post_id)
+    ) {
+        return;
+    }
+
+    if (
+        get_post_type($post_id) !== 'museum_event'
+    ) {
+        return;
+    }
+
+    $enabled = isset(
+        $_POST['museum_event_details_enabled']
+    )
+        ? '1'
+        : '0';
+
+    $subsection_id = isset(
+        $_POST['museum_event_details_subsection']
+    )
+        ? absint(
+            $_POST['museum_event_details_subsection']
+        )
+        : 0;
+
+    update_post_meta(
+        $post_id,
+        '_museum_event_details_enabled',
+        $enabled
+    );
+
+    update_post_meta(
+        $post_id,
+        '_museum_event_details_subsection',
+        $subsection_id
+    );
+
+}
+
+add_action(
+    'save_post_museum_event',
+    'rubtsov_save_event_details'
+);
 
 /*
  * Поле краткого описания мероприятия

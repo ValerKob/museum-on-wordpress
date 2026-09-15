@@ -19,3 +19,25 @@ jQuery(document).ready(function ($) {
     mediaUploader.open();
   });
 });
+
+jQuery(document).ready(function ($) {
+  $("#museum_header_logo_button").on("click", function (e) {
+    e.preventDefault();
+
+    var mediaUploader = wp.media({
+      title: "Выберите логотип",
+      button: {
+        text: "Использовать этот логотип",
+      },
+      multiple: false,
+    });
+
+    mediaUploader.on("select", function () {
+      var attachment = mediaUploader.state().get("selection").first().toJSON();
+
+      $("#museum_header_logo").val(attachment.url);
+    });
+
+    mediaUploader.open();
+  });
+});

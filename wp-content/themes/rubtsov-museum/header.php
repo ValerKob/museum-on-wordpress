@@ -15,7 +15,43 @@
 
 <header>
     <div class="site-header">
-        <div class="site-logo">
+        <?php
+            $museum_header_logo = get_option(
+                'museum_header_logo',
+                ''
+            );
+
+            $museum_header_logo_position = get_option(
+                'museum_header_logo_position',
+                'left'
+            );
+            ?>
+
+            <?php if ($museum_header_logo) : ?>
+
+                <div class="museum-header-logo museum-header-logo-<?php echo esc_attr($museum_header_logo_position); ?>">
+
+                    <a href="<?php echo esc_url(home_url('/')); ?>">
+
+                        <img
+                            src="<?php echo esc_url($museum_header_logo); ?>"
+                            alt="<?php echo esc_attr(
+                                get_option(
+                                    'museum_header_title',
+                                    'НИКОЛАЯ РУБЦОВА'
+                                )
+                            ); ?>"
+                        >
+
+                    </a>
+
+                </div>
+
+            <?php endif; ?>
+        <a
+            href="<?php echo esc_url(home_url('/')); ?>"
+            class="site-logo"
+        >
             <?php
             echo esc_html(
                 get_option(
@@ -24,9 +60,12 @@
                 )
             );
             ?>
-        </div>
+        </a>
 
-        <div class="site-title">
+        <a
+            href="<?php echo esc_url(home_url('/')); ?>"
+            class="site-title"
+        >
             <?php
             echo esc_html(
                 get_option(
@@ -35,7 +74,7 @@
                 )
             );
             ?>
-        </div>
+        </a>
     </div>
 </header>
 <?php endif; ?>

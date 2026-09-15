@@ -1690,3 +1690,193 @@ body::after {
 .museum-event-file-download:active {
   transform: translateY(0);
 }
+
+/* Кнопка «Подробнее» у мероприятия */
+.museum-event-details-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 14px;
+  padding: 11px 20px;
+
+  background: linear-gradient(135deg, #aaa394 0%, #9a9180 45%, #887f6e 100%);
+
+  color: #fffdf4 !important;
+
+  border: 1px solid rgba(91, 82, 67, 0.45);
+  border-radius: 8px;
+
+  text-decoration: none !important;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -2px 4px rgba(70, 62, 50, 0.18),
+    0 3px 8px rgba(0, 0, 0, 0.12);
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.museum-event-details-button:hover {
+  background: linear-gradient(135deg, #b8af9f 0%, #a59c8b 45%, #918675 100%);
+
+  color: #ffffff !important;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -2px 5px rgba(70, 62, 50, 0.2),
+    0 6px 14px rgba(0, 0, 0, 0.16);
+}
+
+.museum-event-details-button:active {
+  transform: translateY(0);
+}
+
+/* Статус актуальности мероприятия */
+.museum-event-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  width: fit-content;
+
+  margin-top: 10px;
+  margin-bottom: 8px;
+
+  padding: 6px 12px;
+
+  border-radius: 20px;
+
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+
+  text-transform: uppercase;
+}
+
+/* Точка статуса */
+.museum-event-status-dot {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+
+  display: inline-block;
+
+  animation: museum-status-blink 1.8s ease-in-out infinite;
+}
+
+/* Актуально */
+.museum-event-status-actual {
+  color: #315b37;
+
+  background: rgba(116, 160, 118, 0.18);
+
+  border: 1px solid rgba(70, 120, 76, 0.35);
+}
+
+.museum-event-status-actual .museum-event-status-dot {
+  background: #4f9b59;
+
+  box-shadow:
+    0 0 6px rgba(79, 155, 89, 0.65),
+    0 0 12px rgba(79, 155, 89, 0.35);
+}
+
+/* Неактуально */
+.museum-event-status-not-actual {
+  color: #7a3b35;
+
+  background: rgba(180, 105, 95, 0.16);
+
+  border: 1px solid rgba(150, 70, 60, 0.35);
+}
+
+.museum-event-status-not-actual .museum-event-status-dot {
+  background: #c6534c;
+
+  box-shadow:
+    0 0 6px rgba(198, 83, 76, 0.7),
+    0 0 12px rgba(198, 83, 76, 0.35);
+}
+
+/* Плавное мигание */
+@keyframes museum-status-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.site-logo,
+.site-title {
+  color: inherit;
+  text-decoration: none;
+}
+
+.site-logo:hover,
+.site-title:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Логотип в шапке */
+
+.site-header {
+  position: relative;
+}
+
+.museum-header-logo {
+  display: flex;
+  align-items: center;
+}
+
+.museum-header-logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none !important;
+}
+
+.museum-header-logo img {
+  display: block;
+  width: auto;
+  height: 48px;
+  max-width: 140px;
+  object-fit: contain;
+}
+
+/* Слева */
+.museum-header-logo-left {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* По центру */
+.museum-header-logo-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Справа */
+.museum-header-logo-right {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
