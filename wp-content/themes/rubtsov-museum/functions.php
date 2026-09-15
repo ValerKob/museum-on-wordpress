@@ -9,7 +9,7 @@ function rubtsov_museum_styles() {
         'rubtsov-museum-style',
         get_stylesheet_uri(),
         array(),
-        '1.0'
+        '1.1'
     );
 
 }
